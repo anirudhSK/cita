@@ -1,11 +1,6 @@
 1. Execution begins at the function main() of the multi phone script
+
 The watch-notify pattern :
-
----------- Ask Lenin about this ----------
-Phone A watches a predicate P (that can be on itself or some other phone) and invokes a callback on some other phone (or itself). 
-
-Obviously, it is superfluous for Phone A to watch for a predicate B on some other Phone B and call Phone C in the process. Phone A can be totally out of the picture in this process. 
----------- Ask Lenin about the above ------------
 
 ------------IMPORTANT STUFF------------
 
@@ -17,26 +12,6 @@ Here A is a phone variable. P is a predicate (check type safety here). F is a fu
 
 This means watch for predicate P on phone A (TODO: if possible) and call F when it becomes true.
 
-TODO:
-1. Can P involve multi-phone predicates ?
-2. Can A be omitted ?
-
-Right now, handle the simplest case of:
- P referring to a predicate on A
- A being given
- F being a function Declaration for sure. Make sure you definitely check this.
-
-
-A.watch(P,F) --> 
-
-On A :
-watch(P,F)
-
-On server/some other phone B :
-F
-
-All function names and declarations have to be global. 
-
 SINGLE PHONE PROGRAMS : 
 
 Statements in each program are of the pattern: 
@@ -44,11 +19,21 @@ watch('<B>.Predicate','<C>.Callback')
 and callbacks are of the form 
 foo('<A>.Predicate')
 
-Again :
-Can <B> be omitted ?
+Right now we handle :
+1.P referring to a predicate on A
+2.A being given
+3.F being a function Declaration for sure. This is checked.
+
+Translation :
+
+A.watch(P,F) -->   On A : watch(P,F)  |||||  On server/some other phone B : F(P)
+
+Assumptions :
+ All function names and declarations have to be global. 
 
 TODO:
-
-What about other global variables and statements in the main javascript program, can we assume they run as such. 
-
----------------IMPORTANT STUFF----------
+1. Can P involve multi-phone predicates ?
+2. Can A be omitted ?
+3. Check that P is a well formed predicate .
+4. What about other global variables and statements in the main javascript program, can we assume they run as such on the server ? 
+-------------------------------------------------------------------
