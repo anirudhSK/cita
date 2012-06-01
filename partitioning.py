@@ -4,7 +4,7 @@ from slimit import ast
 import sys
 parser = Parser()
 if(len(sys.argv) < 2) : 
-   print "Usage : python ast.py "
+   print "Usage : python partitionin.py fileName \n"
    sys.exit(1)
 sourceCode=open(sys.argv[1]).read()
 print "Source code originally is ............ \n", sourceCode
@@ -13,7 +13,7 @@ callgraph=dict();
 # One pass to get all the Function Calls that refer to mobile phone objects
 # The assumption is that they come before main() or anything else. 
 mobileDeviceList=[];
-
+partitionedCode=dict() ; # mapping from string corresponding to object name to string corresponding to the code. 
 def GetMobileDevice(exprNode) :
      assert(isinstance(exprNode,ast.Assign))
      identifierName=exprNode.children()[0].to_ecma()
@@ -27,7 +27,6 @@ def GetMobileDevice(exprNode) :
             if (functionName.startswith("getDeviceByName")): # maybe add more calls in the future, TODO: Need some analysis to approx. the call results at compile time or defer to runtime
                 mobileDevice=exprNode.children()[0]
                 return mobileDevice.to_ecma()
-
 def AnalyseCallBack(functionDeclaration) : 
      assert(isinstance(functionDeclaration,ast.FuncDecl))
      phonesTouched=[]  # to keep track of all the phones that this call back function touched, to decide it's placement. 
@@ -36,8 +35,8 @@ def AnalyseCallBack(functionDeclaration) :
        if(isinstance(node,ast.DotAccessor)):
           phonesTouched.append(node.children()[0].to_ecma())
      return phonesTouched
-
 def ParseMethodCalls(exprNode,fnNames,mobileDeviceList):
+     global partitionedCode
      assert(isinstance(exprNode,ast.FunctionCall))
      fnCallNode=exprNode.children()[0]
      if(isinstance(fnCallNode,ast.DotAccessor)): # check if this is a method call to an object 
@@ -48,17 +47,20 @@ def ParseMethodCalls(exprNode,fnNames,mobileDeviceList):
          if(methodName=="watch"):                # get watchman, predicate and action
            predicate=exprNode.children()[1].to_ecma()
            action=exprNode.children()[2].to_ecma()
-           print "Detected a watch call on phone ",watchMan," with predicate",predicate," and action ",action
+   #        print "Detected a watch call on phone ",watchMan," with predicate",predicate," and action ",action
            action = action.replace('\"','')
            action = action.replace('\'','')
            if(action not in fnNames):
-              print fnNames
-              raise Exception("Invalid watch call because the call back function for the action is undefined ")
+              raise Exception("Invalid watch call because the call back function ie ",action," for the action is undefined in ",fnNames)
            else :
-              print "Function Body of the Action is",fnNames[action].to_ecma()
-              AnalyseCallBack(fnNames[action]);
+  #            print "Function Body of the Action is",fnNames[action].to_ecma()
+              touchedNodes=AnalyseCallBack(fnNames[action]);
+              callBackNode=touchedNodes[0] if (len(touchedNodes)==1) else "server"
+           if (watchMan not in partitionedCode) : partitionedCode[watchMan]=''
+           if (callBackNode not in partitionedCode): partitionedCode[callBackNode]=''
+           partitionedCode[watchMan]=partitionedCode[watchMan] + "watch("+predicate+","+"\""+callBackNode+":"+action+"\") \n"
+           partitionedCode[callBackNode]=partitionedCode[callBackNode]+fnNames[action].to_ecma()+"\n";
 # TODO: Add scoping rules. To make sure nothing is declared globally except for these phone objects. Not sure how to check this yet. Maybe this is ok 
-
 def GetFunctionDefinitions(tree) :
      # make one pass through the entire tree to get all function definitions.
      # TODO: Make the restriction clear that all function declarations and definitions go together in the function foo= { } form 
@@ -79,4 +81,5 @@ if __name__ == "__main__":
                mobileDeviceList.append(GetMobileDevice(exprNode))
             if(isinstance(exprNode,ast.FunctionCall)):  # check if this is a function call to an object 
                 ParseMethodCalls(exprNode,fnList,mobileDeviceList) # TODO: Impose the restiction that all mobile Device declarations come ahead of all else
-  print mobileDeviceList
+  print "-*********\n*******\n------------------THE PARTITIONED CODE IS -----------------------------*********\n*******\n"
+  print partitionedCode
