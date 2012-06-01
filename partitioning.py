@@ -2,6 +2,7 @@ from slimit.parser import Parser
 from slimit.visitors import nodevisitor
 from slimit import ast
 import sys
+import copy
 parser = Parser()
 if(len(sys.argv) < 2) : 
    print "Usage : python partitionin.py fileName \n"
@@ -35,6 +36,27 @@ def AnalyseCallBack(functionDeclaration) :
        if(isinstance(node,ast.DotAccessor)):
           phonesTouched.append(node.children()[0].to_ecma())
      return phonesTouched
+def RewriteCallBack(function,predicate,rewrite) :
+     assert(isinstance(function,ast.FuncDecl))
+     cloneFunction=copy.deepcopy(function)
+     predicate = predicate.replace('\"','')
+     predicate = predicate.replace('\'','')
+     cloneFunction.parameters[0]=ast.Identifier(predicate) # Rewrite the argument with something else. 
+     cloneFunction.elements=map(RewriteFunctionBody,cloneFunction.elements) if rewrite else cloneFunction.elements 
+     return cloneFunction
+def RewriteFunctionBody(functionBody) :
+     if(type(functionBody)==type([])) :             # need to handle lists. 
+               for element in functionBody :
+                   element=RewriteFunctionBody(element)
+               return functionBody
+     elif (isinstance(functionBody,ast.DotAccessor)) :
+               return functionBody.children()[1] # strip off the name of the calling object. 
+     elif (len(functionBody.children())==0):
+               return functionBody      
+     else : 
+               for key in functionBody.__dict__ :
+                  functionBody.__dict__[key]=RewriteFunctionBody(functionBody.__dict__[key])
+               return functionBody
 def ParseMethodCalls(exprNode,fnNames,mobileDeviceList):
      global partitionedCode
      assert(isinstance(exprNode,ast.FunctionCall))
@@ -59,7 +81,8 @@ def ParseMethodCalls(exprNode,fnNames,mobileDeviceList):
            if (watchMan not in partitionedCode) : partitionedCode[watchMan]=''
            if (callBackNode not in partitionedCode): partitionedCode[callBackNode]=''
            partitionedCode[watchMan]=partitionedCode[watchMan] + "watch("+predicate+","+"\""+callBackNode+":"+action+"\") \n"
-           partitionedCode[callBackNode]=partitionedCode[callBackNode]+fnNames[action].to_ecma()+"\n";
+           rewrittenFunction=RewriteCallBack(fnNames[action],predicate,True) if callBackNode != "server" else RewriteCallBack(fnNames[action],predicate,False)
+           partitionedCode[callBackNode]=partitionedCode[callBackNode]+rewrittenFunction.to_ecma()+"\n";
 # TODO: Add scoping rules. To make sure nothing is declared globally except for these phone objects. Not sure how to check this yet. Maybe this is ok 
 def GetFunctionDefinitions(tree) :
      # make one pass through the entire tree to get all function definitions.
@@ -82,4 +105,6 @@ if __name__ == "__main__":
             if(isinstance(exprNode,ast.FunctionCall)):  # check if this is a function call to an object 
                 ParseMethodCalls(exprNode,fnList,mobileDeviceList) # TODO: Impose the restiction that all mobile Device declarations come ahead of all else
   print "-*********\n*******\n------------------THE PARTITIONED CODE IS -----------------------------*********\n*******\n"
-  print partitionedCode
+  for key in partitionedCode :
+        print "On node ",key,", code is \n\n"
+        print partitionedCode[key]
