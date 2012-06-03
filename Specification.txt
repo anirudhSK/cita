@@ -37,3 +37,13 @@ TODO:
 3. Check that P is a well formed predicate .
 4. What about other global variables and statements in the main javascript program, can we assume they run as such on the server ? 
 -------------------------------------------------------------------
+
+Predicates are string that we 'll parse  on our own (no type safety for now): 
+watch('driving&outdoor', action);
+start('gps', server:foo);
+
+TODO For next week :
+
+remoteCalls from server to nodes
+multiphone predicates
+Integrate entire flow end to end

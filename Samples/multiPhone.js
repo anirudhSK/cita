@@ -8,5 +8,4 @@ function main()
 function foo(e)
 {
     q.notify("P is driving");
-    r.notify("P is driving");
 }
