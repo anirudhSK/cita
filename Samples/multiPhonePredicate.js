@@ -1,0 +1,8 @@
+a=getDevice("Lenin")
+p=getPredicate(a,"walking",vararg)
+q=getPredicate(b,"driving",vararg)
+p=p.and(p)
+p=p.and(q)
+p.within(q)
+p.until(q)
+p.for(5)
