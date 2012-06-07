@@ -83,7 +83,7 @@ def ParseMethodCalls(exprNode,fnNames,mobileDeviceList,predicateList):
 if __name__ == "__main__":
   parser = Parser()
   if(len(sys.argv) < 2) : 
-    print "Usage : python partitionin.py fileName \n"
+    print "Usage : python partitioning.py fileName \n"
     sys.exit(1)
   sourceCode=open(sys.argv[1]).read()
   print "Source code originally is ............ \n", sourceCode

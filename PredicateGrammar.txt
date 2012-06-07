@@ -1,0 +1,7 @@
+-predicate=GetPredicate(...)
+-predicate=predicate.<binOp>(predicate)
+<binOp>=AND,NOT
+-WITHIN
+predicate=predicate.within(predicate,time)
+-FOR
+predicate=predicate.for(time)
