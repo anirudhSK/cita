@@ -25,6 +25,7 @@ class Predicate(object) :
       self.childPred=[]             # list of children that are relevant to the operator in question.
 
 def PrettyPrintPredicate(predicateObj) :
+    ''' Pretty print the tree or ast of the predicate so that it's human readable '''
     if(len(predicateObj.childPred)==0):     
        return predicateObj.value.to_ecma()
     else :
@@ -37,10 +38,53 @@ def PrettyPrintPredicate(predicateObj) :
             return "("+ " WITHIN "+ PrettyPrintPredicate(predicateObj.childPred[0])+" " + PrettyPrintPredicate(predicateObj.childPred[1]) + " " + str(astListToecma(predicateObj.params)) + ")" 
        elif (operator==Operator.FOR) :
             return "("+" FOR "+PrettyPrintPredicate(predicateObj.childPred[0])+"  " + str(astListToecma(predicateObj.params)) + ")"
-def astListToecma(astNodeList) : 
+def astListToecma(astNodeList) :
+    ''' Call to_ecma() on every element of an ast Node List ''' 
     strFn=lambda x : x.to_ecma() 
     return map(strFn,astNodeList)
 
+
+def GetPredicateAST(fnCallNode,predicateList) :
+        ''' Given a node of type ast.FunctionCall, parse it to get the predicate AST.
+            Do it recursively if required '''
+        assert(isinstance(fnCallNode,ast.FunctionCall))
+        functionName=fnCallNode.children()[0].to_ecma() # getString repr.
+        if (functionName.startswith("getPredicate")): # maybe add more calls in the future, TODO: Need some analysis to approx. the call results at compile time or defer to runtime
+            return Predicate(fnCallNode)
+        elif (isinstance(fnCallNode.children()[0],ast.DotAccessor)) : # recurse
+            dotNotation=fnCallNode.children()[0]
+            argument=fnCallNode.children()[1]
+            print "Object method call "
+            predVar=dotNotation.children()[0]
+            operator=dotNotation.children()[1] # binops such as AND,OR and NOT for now
+            opNum=GetOperator(operator)
+            tempPred=Predicate(-1)
+            tempPred.atomic=False # aggregated operator
+            if (isinstance(predVar,ast.Identifier)):
+              if (predVar.to_ecma() in predicateList)  :
+                currentPredAtVar=predicateList[predVar.to_ecma()]
+              else : 
+                raise Exception ("Calling predicate operator oin non-predicate",predVar.to_ecma())
+            elif(isinstance(predVar,ast.FunctionCall)):
+                currentPredAtVar=GetPredicateAST(predVar,predicateList)
+            tempPred.connector=opNum # get operator 
+            if (opNum==Operator.FOR) : 
+                tempPred.childPred=[currentPredAtVar] # works only for binary operators for now
+                if(len(fnCallNode.children()) >= 2) :
+                   tempPred.params=fnCallNode.children()[1:] # arguments from 2 onwards are other parameters. Nothing for AND
+                return tempPred 
+            elif (opNum==Operator.AND) or (opNum==Operator.OR) or (opNum==Operator.WITHIN) : 
+                if(isinstance(argument,ast.Identifier)):
+                   if (argument.to_ecma() not in predicateList) : 
+                    raise Exception("Only previously declared predicate variables are allowed as arguments. ",argument.to_ecma())," is not declared earlier"
+                   else :
+                    argumentAST=predicateList[argument.to_ecma()] 
+                elif (isinstance(argument,ast.FunctionCall)): # recurse
+                    argumentAST=GetPredicateAST(argument,predicateList) # recurse here
+                tempPred.childPred=[currentPredAtVar,argumentAST] # works only for binary operators for now
+                if(len(fnCallNode.children()) >= 3) :
+                   tempPred.params=fnCallNode.children()[2:] # arguments from 2 onwards are other parameters. Nothing for AND
+                return tempPred 
 def PredicatePass(tree) :
      # scan only global statements, nothing within functions. 
      '''   One pass over the tree to get the list of all Predicates in the multi script program 
@@ -53,44 +97,14 @@ def PredicatePass(tree) :
         # Store all mobile nodes in a list ######
         if(isinstance(node,ast.ExprStatement)):
             exprNode=node.expr
+            predicateVariable=exprNode.children()[0]
             if(isinstance(exprNode,ast.Assign)):  # check if this is an assignment to a Device object
-                 if( (isinstance(exprNode.children()[0],ast.Identifier)) and (isinstance(exprNode.children()[1],ast.FunctionCall))) : # check if the LHS is an identifier and the RHS is a fnCall
+                 if(isinstance(exprNode.children()[1],ast.FunctionCall)) : # check if the RHS is a fnCall
                       fnCallNode=node.expr.children()[1] # get fnCall
-                      functionName=fnCallNode.children()[0].to_ecma() # getString repr.
-                      if (functionName.startswith("getPredicate")): # maybe add more calls in the future, TODO: Need some analysis to approx. the call results at compile time or defer to runtime
-                          predicateVariable=exprNode.children()[0]
-                          predicateList[predicateVariable.to_ecma()]=Predicate(fnCallNode)
-                      elif (isinstance(fnCallNode.children()[0],ast.DotAccessor)) :
-                          dotNotation=fnCallNode.children()[0]
-                          argument=fnCallNode.children()[1]
-                          print "Object method call "
-                          predVar=dotNotation.children()[0]
-                          operator=dotNotation.children()[1] # binops such as AND,OR and NOT for now
-                          opNum=GetOperator(operator)
-                          if (opNum==Operator.FOR) : 
-                              tempPred=Predicate(-1)
-                              currentPredAtVar=predicateList[predVar.to_ecma()]
-                              tempPred.atomic=False # aggregated operator
-                              tempPred.connector=opNum # get operator 
-                              tempPred.childPred=[currentPredAtVar] # works only for binary operators for now
-                              if(len(fnCallNode.children()) >= 2) :
-                                 tempPred.params=fnCallNode.children()[1:] # arguments from 2 onwards are other parameters. Nothing for AND
-                              predicateList[predVar.to_ecma()]=tempPred 
-                          elif (opNum==Operator.AND) or (opNum==Operator.OR) or (opNum==Operator.WITHIN) : 
-                              if (predVar.to_ecma() not in predicateList) :
-                                  raise Exception ("Calling predicate operator on non-predicate",predVar.to_ecma())
-                              if (argument.to_ecma() not in predicateList) : # TODO: For now, only previously declared variables are allowed as arguments, not getPredicate.. itself
-                                  raise Exception("Only previously declared predicates are allowed as arguments and not",argument.to_ecma())
-                              tempPred=Predicate(-1)
-                              currentPredAtVar=predicateList[predVar.to_ecma()]
-                              tempPred.atomic=False # aggregated operator
-                              tempPred.connector=GetOperator(operator) # get operator 
-                              tempPred.childPred=[currentPredAtVar,predicateList[argument.to_ecma()]] # works only for binary operators for now
-                              if(len(fnCallNode.children()) >= 3) :
-                                 tempPred.params=fnCallNode.children()[2:] # arguments from 2 onwards are other parameters. Nothing for AND
-                              predicateList[predVar.to_ecma()]=tempPred 
-
+                      predicateAST=GetPredicateAST(fnCallNode,predicateList)
+                      predicateList[predicateVariable.to_ecma()]=predicateAST
      return predicateList
+
 def GetOperator(operator) :
     assert(isinstance(operator,ast.Identifier))
     if (operator.to_ecma()=="and") : 
@@ -113,4 +127,7 @@ if __name__ == "__main__" :
      predicateList=PredicatePass(tree)
      for predicateVar in predicateList : 
             print "Name of variable :",predicateVar
-            print "Predicate evaluation",PrettyPrintPredicate(predicateList[predicateVar])
+            if(predicateList[predicateVar] is not None):
+	            print "Predicate evaluation",PrettyPrintPredicate(predicateList[predicateVar])
+            else :  
+                    print "Not a predicate"
