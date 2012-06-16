@@ -1,0 +1,55 @@
+<script language="JavaScript"> 
+
+var callId = "";
+function addCallback(e, a, p)
+{
+	params = "";
+    action = "shell:print";
+    if (typeof p != 'undefined')
+    {
+    	params = JSON.stringify(p);
+    }
+    if (typeof a != 'undefined')
+    {
+    	action = a;
+    }
+    
+	callback.add(e, action, params, callId);
+}
+
+function removeCallback(e, a)
+{
+	if (typeof a != 'undefined')
+    {
+		callback.remove(e, a);
+	}
+	else
+	{
+		callback.remove(e);
+	}
+}
+
+function addCall(a, p)
+{
+    if (typeof p != 'undefined')
+    {
+    	call.call(a, p);
+    }
+    else
+    {
+    	call.call(a);
+    }
+}
+
+function setCallId(c) 
+{ 
+	callId = c; 
+} 
+
+function sprint(v) 
+{ 
+	log.log(callId, v); 
+} 
+log.log(); 
+
+</script>
