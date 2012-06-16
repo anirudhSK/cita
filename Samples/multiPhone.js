@@ -5,7 +5,7 @@ pred1=getPredicate("driving","Anirudh")
 
 function main()
 {
-    p.watch(pred2, "foo");
+    p.watch(pred1, "foo");
 }
 function foo(e)
 {

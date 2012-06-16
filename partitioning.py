@@ -13,7 +13,7 @@ def AnalyseCallBack(functionDeclaration) :
          This is determined by seeing all expressions with a dot accessor ie x.... ''' 
      assert(isinstance(functionDeclaration,ast.FuncDecl))
      phonesTouched=[]  # to keep track of all the phones that this call back function touched, to decide it's placement. 
-     tree=parser.parse(functionDeclaration.to_ecma());
+     tree=Parser().parse(functionDeclaration.to_ecma());
      for node in nodevisitor.visit(tree):
        if(isinstance(node,ast.DotAccessor)):
           phonesTouched.append(node.children()[0].to_ecma())
@@ -80,12 +80,8 @@ def ParseMethodCalls(exprNode,fnNames,mobileDeviceList,predicateList):
 
 # TODO: Add scoping rules. To make sure nothing is declared globally except for these phone objects. Not sure how to check this yet. Maybe this is ok 
 
-if __name__ == "__main__":
+def partitionCode(sourceCode):
   parser = Parser()
-  if(len(sys.argv) < 2) : 
-    print "Usage : python partitioning.py fileName \n"
-    sys.exit(1)
-  sourceCode=open(sys.argv[1]).read()
   print "Source code originally is ............ \n", sourceCode
   tree=parser.parse(sourceCode);
   fnList=FunctionDefinitionsPass(tree)
@@ -101,3 +97,11 @@ if __name__ == "__main__":
   for key in partitionedCode :
         print "On node ",key,", code is \n\n"
         print partitionedCode[key]
+
+
+if __name__ == "__main__":
+  if(len(sys.argv) < 2) : 
+    print "Usage : python partitioning.py fileName \n"
+    sys.exit(1)
+  sourceCode=open(sys.argv[1]).read()
+  sys.exit(partitionCode(sourceCode))
