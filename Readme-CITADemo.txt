@@ -100,7 +100,8 @@ In the first window
 - Change device name to - tiffany
 
 In the second window
-- Change device name to - server
+- Change device name to - server 
+  (The name of server should be the same as the DeviceName in CITAJSServer: com.CITAJSServer.ShellClient::ShellClientSettings.java)
 - Use the same task Id from the first window
 
 In the third window
