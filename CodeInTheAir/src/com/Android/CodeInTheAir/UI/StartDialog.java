@@ -89,7 +89,7 @@ public class StartDialog extends Activity
           Log.v("CITA: StartDialog","It's a toast here, so modifying \n");
           action="toast(\"Hello CITA\")";
         }
-        String strCommand = "function foo(pred)={ phone."+action+"; };  addCallback(\""+trigger+"\",\"foo\")";
+        String strCommand = "function foo(pred) { phone."+action+"; };  addCallback(\""+trigger+"\",\"foo\")";
 
         ShellClientHandler handler = ShellClientComponents.shellClientManager.getHandler(strTask);
         handler.execute(strSession, strCommand);
