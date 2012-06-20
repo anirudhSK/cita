@@ -22,7 +22,9 @@ if (statement == ''):
 
 #print statement
 # partition the code here ;
-partitionedCode=partitioning.partitionCode(statement)
+# strip off any "/n" in the code
+srcCode=statement.replace("\n"," ");
+partitionedCode=partitioning.partitionCode(srcCode)
 for device in partitionedCode :
  client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
  client_socket.connect(addr)                                       

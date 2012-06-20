@@ -101,10 +101,15 @@ public class ShellClientInterface extends Thread
 
 	public void sendResponse(String strTask, String strSession, String strResponse)
 	{
+           try {
 		lock.lock();
 		serverWriter.println(strTask);
 		serverWriter.println(strSession);
 		serverWriter.println(strResponse);
 		lock.unlock();
+           }
+           catch (Exception e) {
+                System.out.println("Could not send back response probably cause the server doesn't exist \n");
+           }
 	}
 }

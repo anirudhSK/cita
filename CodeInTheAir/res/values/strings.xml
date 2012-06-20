@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, StartDialog!</string>
+    <string name="triggerStr">Triggers : </string>
+    <string name="actionStr">Actions : </string>
     <string name="app_name">CodeInTheAir</string>
+    <string name="button_text">Run CITA app</string>
+    <string name="trigger_prompt">Choose a trigger</string>
+    <string-array name="triggers_array">
+        <item>shake</item>
+        <item>walking</item>
+        <item>running</item>
+    </string-array>
+    <string name="action_prompt">Choose a trigger</string>
+    <string-array name="actions_array">
+        <item>toast("Hello CITA")</item>
+        <item>vibrate()</item>
+        <item>notify()</item>
+        <item>ring()</item>
+        <item>openMyTracks()</item>
+        <item>openMusic()</item>
+    </string-array>
 </resources>

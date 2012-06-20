@@ -17,6 +17,14 @@ shell.getXmlHttpRequest = function() {
 
   return null;
 };
+shell.onButtonClick = function() {
+  var statement = document.getElementById('statement');
+  if (this.historyCursor == this.history.length - 1) {
+    this.history[this.historyCursor] = statement.value;
+  }
+    return this.runStatement();
+};
+
 
 shell.onPromptKeyPress = function(event) {
   var statement = document.getElementById('statement');
@@ -38,10 +46,10 @@ shell.onPromptKeyPress = function(event) {
     this.historyCursor = this.history.length - 1;
     this.history[this.historyCursor] = statement.value;
   }
-
-  if (event.keyCode == 13 /* enter */ && event.shiftKey) {
-    return this.runStatement();
-  }
+//
+//  if (event.keyCode == 13 /* enter */ && event.shiftKey) {
+//    return this.runStatement();
+//  }
 };
 
 shell.doneRequest = function(req) {

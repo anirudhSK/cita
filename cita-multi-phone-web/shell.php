@@ -29,7 +29,9 @@
             onfocus="document.getElementById('statement').focus()">&gt;&gt;&gt;</textarea>
   <textarea class="prompt" name="statement" id="statement" rows="4"
             onkeypress="return shell.onPromptKeyPress(event);"></textarea>
-
+  <br>
+  <button type="button" onclick="return shell.onButtonClick()">Create and Run </button>
+  <br><br>
   </nobr>
 
   <input type="hidden" name="session" value="<?php printf("%s", uniqid()); ?>" />
