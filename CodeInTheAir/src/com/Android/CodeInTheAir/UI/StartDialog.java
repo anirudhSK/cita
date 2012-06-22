@@ -1,5 +1,8 @@
 package com.Android.CodeInTheAir.UI;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -13,12 +16,12 @@ import android.util.Log;
 import com.Android.CodeInTheAir.Global.AppContext;
 import com.Android.CodeInTheAir.ShellClient.ShellClientComponents;
 import com.Android.CodeInTheAir.ShellClient.ShellClientHandler;
-import java.lang.*;
 
 public class StartDialog extends Activity 
 {
     Spinner actionSpinner;
     Spinner triggerSpinner;
+    private List<String> tasks;
     @Override
     public void onCreate(Bundle savedInstanceState) 
     {
@@ -28,6 +31,7 @@ public class StartDialog extends Activity
         
         Components.start();
 
+        tasks = new ArrayList<String>();
         // trigger drop-down. Drops downs are called spinners in Android
         triggerSpinner = (Spinner) findViewById(R.id.trigger);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -83,19 +87,35 @@ public class StartDialog extends Activity
         String strSession = "23ae234"; // random strID
         String trigger = triggerSpinner.getSelectedItem().toString();
         String action="vibrate()";
-        action=actionSpinner.getSelectedItem().toString(); 
+        action = actionSpinner.getSelectedItem().toString(); 
         Log.v("CITA : StartDialog","Action is "+action+" Toast is toast()");
+        
         if (action.startsWith("toa")) {
           Log.v("CITA: StartDialog","It's a toast here, so modifying \n");
           action="toast(\"Hello CITA\")";
         }
+        
+        tasks.add(action + "," + trigger);
         String strCommand = "function foo(pred) { phone."+action+"; };  addCallback(\""+trigger+"\",\"foo\")";
 
         ShellClientHandler handler = ShellClientComponents.shellClientManager.getHandler(strTask);
         handler.execute(strSession, strCommand);
 
     }
-    
+    public void onRemoveButtonClicked(View v){
+    	  Toast.makeText(StartDialog.this, "Remove tasks", Toast.LENGTH_SHORT).show();
+          for(int i = 0; i < tasks.size(); ++i){
+        	  String taskString = tasks.get(i);
+        	  String[] taskSeg = taskString.split(",");
+        	  
+        	  String strTask = "4aef23232"; // random task id
+        	  String strSession = "23ae234"; // random strID
+        	  String strCommand = "removeCallback(\""+taskSeg[1]+"\",\"foo\")";
+        	  ShellClientHandler handler = ShellClientComponents.shellClientManager.getHandler(strTask);
+              handler.execute(strSession, strCommand);
+
+          }
+    }
 
 	
 	@Override 
@@ -108,8 +128,8 @@ public class StartDialog extends Activity
 
     public void onItemSelected(AdapterView<?> parent,
         View view, int pos, long id) {
-//      Toast.makeText(parent.getContext(), "Selected item is " +
-//          parent.getItemAtPosition(pos).toString(), Toast.LENGTH_LONG).show();
+      Toast.makeText(parent.getContext(), "Selected item is " +
+          parent.getItemAtPosition(pos).toString(), Toast.LENGTH_LONG).show();
     }
 
     public void onNothingSelected(AdapterView parent) {
