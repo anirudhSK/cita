@@ -1,7 +1,10 @@
 package com.Android.CodeInTheAir.JSInterface;
 
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -54,5 +57,22 @@ public class JS_Phone
 	public void toast(String msg)
 	{
 		Toast.makeText(AppContext.context, msg, Toast.LENGTH_LONG).show();
+	}
+	
+	public void openMytracks(){
+		PackageManager pm = AppContext.context.getPackageManager();
+		Intent intent = pm.getLaunchIntentForPackage("com.google.android.maps.mytracks");
+		if(intent != null){
+			AppContext.context.startActivity(intent);
+
+		}
+	}
+	public void openMusic(){
+		PackageManager pm = AppContext.context.getPackageManager();
+		Intent intent = pm.getLaunchIntentForPackage("com.google.android.music");
+		if(intent != null){
+			AppContext.context.startActivity(intent);
+
+		}
 	}
 }
