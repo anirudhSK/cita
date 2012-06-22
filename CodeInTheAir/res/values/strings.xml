@@ -4,6 +4,7 @@
     <string name="actionStr">Actions : </string>
     <string name="app_name">CodeInTheAir</string>
     <string name="button_text">Run CITA app</string>
+    <string name="removeButton_text">Remove tasks</string>
     <string name="trigger_prompt">Choose a trigger</string>
     <string-array name="triggers_array">
         <item>shake</item>
@@ -16,7 +17,7 @@
         <item>vibrate()</item>
         <item>notify()</item>
         <item>ring()</item>
-        <item>openMyTracks()</item>
+        <item>openMytracks()</item>
         <item>openMusic()</item>
     </string-array>
 </resources>
