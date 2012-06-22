@@ -28,10 +28,16 @@
     />
    <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
         android:text="@string/button_text"
         android:onClick="onButtonClicked"/>
+    <Button
+        android:id="@+id/removeButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+       
+        android:text="@string/removeButton_text"
+        android:onClick="onRemoveButtonClicked"/>
 
 </LinearLayout>
