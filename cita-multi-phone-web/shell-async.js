@@ -55,19 +55,22 @@ shell.onPromptKeyPress = function(event) {
 shell.doneRequest = function(req) {
   if (req.readyState == this.DONE_STATE) {
     var result = req.responseText.replace(/^\s*|\s*$/g, '');  // trim whitespace
-    document.getElementById('ajax-status').innerHTML = result;
+    //document.getElementById('ajax-status').innerHTML = result;
+    document.getElementById('output').value=result; // ANIRUDH: Changed this
   }
 };
 
 shell.doneResponse = function(req) {
-  if (req.readyState == this.DONE_STATE) {
-    var output = document.getElementById('output');
-    var result = req.responseText.replace(/^\s*|\s*$/g, '');  // trim whitespace
-    if (result != '') {
-      output.value = result + '\n' + output.value;
-    }
-    mTimer = setTimeout('shell.getResponse()', 0);
-  }
+  a=1;
+  // ANIRUDH: Commented this out since we are reusing the bottom text area for something else. 
+  //if (req.readyState == this.DONE_STATE) {
+  //  var output = document.getElementById('output');
+  //  var result = req.responseText.replace(/^\s*|\s*$/g, '');  // trim whitespace
+  //  if (result != '') {
+  //    output.value = result + '\n' + output.value;
+  //  }
+  //  mTimer = setTimeout('shell.getResponse()', 0);
+  //}
 };
 
 
@@ -106,7 +109,7 @@ shell.runStatement = function() {
   this.historyCursor = this.history.length - 1;
   statement.value='';
 
-  document.getElementById('ajax-status').innerHTML = "Sending";
+  //document.getElementById('ajax-status').innerHTML = "Sending"; // ANIRUDH: Come back to this later if required. 
 // ANIRUDH: Don't know what the code below does 
 //  if (this.streamResponse == 0) {
 //    this.getResponse();

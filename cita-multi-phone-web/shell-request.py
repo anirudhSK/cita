@@ -6,7 +6,7 @@ import time
 import partitioning 
 import sys
 
-addr = ('18.251.7.128', 8001)
+addr = ('18.251.5.213', 8001)
 
 form = cgi.FieldStorage()
 session = form['session'].value
@@ -23,6 +23,7 @@ if (statement == ''):
 #print statement
 # partition the code here ;
 # strip off any "/n" in the code
+
 srcCode=statement.replace("\n",";");
 try :
    partitionedCode=partitioning.partitionCode(srcCode)
@@ -31,15 +32,15 @@ except:
 for device in partitionedCode :
  client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
  client_socket.connect(addr)                                       
- print "Device is ",device 
+# print "Device is ",device 
  client_socket.send(device + '\n')
- print "task is ",task
+# print "task is ",task
  client_socket.send(task + '\n')
  client_socket.send(session + '\n')
  client_socket.send(partitionedCode[device] + '\n')
  data = client_socket.recv(4096);
  client_socket.close()
- print data
+# print data
 
 # send data to server
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,4 +51,5 @@ client_socket.send(session + '\n')
 client_socket.send("a=10;" + '\n')
 data = client_socket.recv(4096);
 client_socket.close()
-print data
+
+#print data

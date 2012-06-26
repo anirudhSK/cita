@@ -24,7 +24,7 @@ def RewriteCallBack(function,predicate,rewrite,predicateList,mobileDeviceList) :
      ''' Rewrite callback function to run on a single phone. As is, it's a multi phone script function.
          It needs to be rewritten into a single phone function '''
      assert(isinstance(function,ast.FuncDecl))
-     print predicateList
+     #print predicateList
      cloneFunction=copy.deepcopy(function)
      predicate = predicate.replace('\"','')
      predicate = predicate.replace('\'','')
@@ -92,7 +92,8 @@ def ParseMethodCalls(exprNode,fnNames,mobileDeviceList,predicateList):
 
 def partitionCode(sourceCode):
   parser = Parser()
-  print "Source code originally is ............ \n", sourceCode
+  sourceCodeInHtml=sourceCode.replace(';','\n');
+  print "MULTI PHONE SCRIPT \n----------------------------------------\n", sourceCodeInHtml
   tree=parser.parse(sourceCode);
   fnList=FunctionDefinitionsPass(tree)
   mobileDeviceList=MobileDevicesPass(tree)
@@ -102,12 +103,13 @@ def partitionCode(sourceCode):
             exprNode=node.expr
             if(isinstance(exprNode,ast.FunctionCall)):  # check if this is a function call to an object 
                 ParseMethodCalls(exprNode,fnList,mobileDeviceList,predicateList) # TODO: Impose the restiction that all mobile Device declarations come ahead of all else
-  print "-*********\n*******\n------------------THE PARTITIONED CODE IS -----------------------------*********\n*******\n"
+  print "\n\nPARTITIONED CODE \n----------------------------------------\n",
   returnCode =dict()
   for key in partitionedCode :
-        print "On node ",mobileDeviceList[key],", code is \n\n"
-        print partitionedCode[key]
+        print "On phone name \"",mobileDeviceList[key],"\" :  \n ",
+        print "\t",partitionedCode[key],"\n"
         returnCode[mobileDeviceList[key]]=partitionedCode[key]
+  print ""
   return returnCode
 
 if __name__ == "__main__":
